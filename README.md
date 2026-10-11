@@ -8,8 +8,9 @@ Cloudflare を、公式ドキュメントを教科書に **手を動かして** 
 ## 始め方
 
 1. [curriculum/README.md](curriculum/README.md) でロードマップと前提（費用・ドメイン）を確認する
-2. AI エージェントを起動し、「00 から始めたい」のように伝える
-3. セッションの終わりに [PROGRESS.md](PROGRESS.md) を更新する
+2. `origin/main` から `learn/<NN>-<topic>` ブランチを切り、AI エージェントに「00 から始めたい」のように伝える
+3. 演習ごとにコミットし、Draft PR を出して進める。PR がレビューの場になり、マージがモジュールの修了になる（詳しくは [AGENTS.md](AGENTS.md) の「PR で進める」）
+4. セッションの終わりに [PROGRESS.md](PROGRESS.md) を更新し、PR にコミットする
 
 ## 構成
 
