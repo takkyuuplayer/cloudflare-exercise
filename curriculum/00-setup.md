@@ -52,7 +52,7 @@ Dashboard にログインし、次の値を見つけて `labs/00-setup/NOTES.md`
 
 `labs/00-setup/terraform/` に最小の構成を作る。
 
-- `required_providers` で `cloudflare/cloudflare` の v5 系を固定する
+- `required_providers` で `cloudflare/cloudflare` の最新のメジャーバージョンを固定する
 - 認証情報はファイルに書かず、環境変数 `CLOUDFLARE_API_TOKEN` で渡す
 - data source でアカウント情報を読み、`output` で表示する（リソースはまだ作らない）
 

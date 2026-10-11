@@ -18,8 +18,6 @@
 - [Workers KV](https://developers.cloudflare.com/kv/)
 - [Bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/)
 
-> v4 から v5 でリソース名・属性が大きく変わっている。ブログ記事などを参考にするときは、v5 の Registry ドキュメントと照らし合わせること。
-
 ## 演習
 
 ### 02-1 `[IaC]` KV namespace を Terraform で作る

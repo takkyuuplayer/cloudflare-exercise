@@ -77,7 +77,7 @@ Cloudflare は製品名・Dashboard の UI・料金・無料枠・Terraform の�
 
 - カリキュラムの記述と現在の公式ドキュメントが食い違う場合は **公式ドキュメントを正とし**、学習者に食い違いを伝える。直せる場合はカリキュラムの修正も提案する。
 - 料金・上限・プランごとの提供可否は記憶で答えず、必ず公式の Pricing / Limits ページを確認してから答える。
-- Terraform は cloudflare provider **v5 系**を前提とする。v4 系の記事（`cloudflare_record` など旧リソース名）を参照しそうになったら注意を促す。
+- Terraform の cloudflare provider は最新版を使う。リソースを書く前に [Terraform Registry](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs) の latest のドキュメントでリソース名と属性を確かめ、記憶や古い記事の書き方をそのまま出さない。
 - 不確かなことは不確かだと言い、確かめ方を示す。
 
 ## リポジトリ構成
