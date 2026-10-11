@@ -1,0 +1,22 @@
+# Node / Workers
+node_modules/
+.wrangler/
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+.terraform.tfstate.lock.info
+
+# OS / editor
+.DS_Store
+
+# Claude Code worktrees
+.claude/worktrees/
