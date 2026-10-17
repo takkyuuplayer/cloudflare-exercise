@@ -121,3 +121,10 @@ Account Name: takkyuuplayer
 - `.terraform.lock.hcl` をコミットする理由: provider のバージョンをロックするため。正確なバージョンとチェックサムが書かれているので、誰が `init` しても（CI でも）同じ provider が入る。上げるときは `terraform init -upgrade` で明示的に上げる
 - `.terraform/` をコミットしない理由: ダウンロードした provider のキャッシュで、`init` すれば作り直せる
 - `apply` すると手元に `terraform.tfstate`（state ファイル）ができる。`.gitignore` で除外している
+
+## チェックポイント
+
+- Global API Key ではなく API トークンを使う理由: 権限を細かく絞れる（fine-grained）から。Global API Key はユーザーのすべての権限を持ち、範囲も期限も絞れない
+- トークンが漏れたら: まずトークンを無効化するか、作り直す（Roll）。そのあと、漏れていた間に何をされたかを Audit Logs で確認する
+- アカウントとゾーン: アカウントの中にゾーン（ドメイン）がある。1 つのアカウントに複数のゾーンを持てる（00-1）
+- `wrangler login` の認証情報の保存場所: `~/Library/Preferences/.wrangler/config/default.toml`。CI ではブラウザでの認可ができず、権限も広く個人にひも付くので使わない（00-3）
