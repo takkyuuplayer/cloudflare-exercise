@@ -56,6 +56,12 @@
 - TTL: なし（No expiration）
 - 参考: [Workers roles and permissions](https://developers.cloudflare.com/workers/authorization/workers/)
 
+#### 決めたこと
+
+- Metadata Read-Only と Content Read-Only は Editor に含まれるので外す
+- Editor は既存の Worker の更新とデプロイだけで、新しい Worker は作れない（作るにはアカウント全体の Admin が必要）。トークンを Admin にはせず、新しい Worker は OAuth で手作業で作る。トークンは Editor のまま、Worker ができたらその Worker だけに範囲を絞る（CI を最小権限にするため）。まだ存在しない Worker は範囲に指定できないので、絞るのは 01 で Worker を作ったあと
+- TTL と IP 制限は付けない。どこからでも、いつまでも使えるようにするため。GitHub Actions の実行環境は IP が決まっていないので、IP 制限は CI と相性が悪い。その代わり、漏れたときは Dashboard ですぐに失効させる
+
 ### terraform 用トークン
 
 - 未作成
