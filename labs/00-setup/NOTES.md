@@ -112,3 +112,12 @@ Account Name: takkyuuplayer
 ```
 
 - OAuth との違い: アカウントにひも付く。権限の一覧は `whoami` に出ず、Dashboard で確認する
+
+## 00-4 Terraform から API を呼ぶ
+
+- `terraform plan` / `apply` で `account_name = "takkyuuplayer"` が出た
+- 渡し方: API トークンは `CLOUDFLARE_API_TOKEN`、Account ID は `TF_VAR_account_id`（どちらも環境変数で、リポジトリに書かない）
+- `version = "~> 5.28"`: 5.28 以上で、6 は許さない。最新のメジャーバージョン（5）に固定している
+- `.terraform.lock.hcl` をコミットする理由: provider のバージョンをロックするため。正確なバージョンとチェックサムが書かれているので、誰が `init` しても（CI でも）同じ provider が入る。上げるときは `terraform init -upgrade` で明示的に上げる
+- `.terraform/` をコミットしない理由: ダウンロードした provider のキャッシュで、`init` すれば作り直せる
+- `apply` すると手元に `terraform.tfstate`（state ファイル）ができる。`.gitignore` で除外している
