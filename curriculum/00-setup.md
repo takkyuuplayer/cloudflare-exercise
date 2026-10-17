@@ -14,7 +14,9 @@
 
 - [Fundamentals](https://developers.cloudflare.com/fundamentals/) — アカウントとゾーンの概念
 - [Create API token](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/)
+- [Find account and zone IDs](https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/)
 - [API token permissions](https://developers.cloudflare.com/fundamentals/api/reference/permissions/)
+- [Workers roles and permissions](https://developers.cloudflare.com/workers/authorization/workers/) — Workers の権限は role（Editor / Admin など）で指定する
 - [Install/Update Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
 - [Terraform](https://developers.cloudflare.com/terraform/)
 
@@ -22,7 +24,7 @@
 
 ### 00-1 `[Dashboard]` アカウントを観察する
 
-Dashboard にログインし、次の値を見つけて `labs/00-setup/NOTES.md` にメモする（ID は秘密情報ではないが、トークンは書かない）。
+Dashboard にログインし、次の値を見つけて `labs/00-setup/NOTES.md` にメモする。トークンは書かない。Account ID は認証情報ではないが、公開してよいと明記した公式の情報はない。リポジトリが public なら、値は書かずに見つけ方だけを書くことも検討する。
 
 - Account ID
 - アカウントのメンバーと自分のロール
@@ -34,7 +36,7 @@ Dashboard にログインし、次の値を見つけて `labs/00-setup/NOTES.md`
 
 テンプレートを使わずに **Custom token** で次の 2 つを作る。
 
-1. `wrangler` 用: Workers のデプロイに必要な権限だけ
+1. `wrangler` 用: Workers のデプロイに必要な権限だけ（既存の Worker の更新と、新しい Worker の作成で必要な role が違うことに注意）
 2. `terraform` 用: このカリキュラム前半で使うリソース（Workers KV など）を編集できる権限だけ
 
 トークンはパスワードマネージャーなどに保管し、リポジトリには置かない。
