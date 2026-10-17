@@ -46,3 +46,24 @@
 ### 状態
 
 - スキップ: トークンはまだ作っていない。トークンが必要になる演習（00-3 の API トークンでの認証、00-4）に入るときに作る
+
+## 00-3 wrangler でログインする
+
+### OAuth（`wrangler login`）
+
+`npx wrangler whoami` の結果（wrangler 4.149.0、メールアドレスと Account ID は伏せた）:
+
+```
+👋 You are logged in with an OAuth Token, associated with the email <email>
+🔐 Credentials are stored in: ~/Library/Preferences/.wrangler/config/default.toml
+Account Name: takkyuuplayer
+🔓 Token Permissions:
+- user (read), offline_access, account (read)
+- workers (write), workers_kv (write), workers_routes (write), workers_scripts (write), workers_tail (read)
+- d1 (write), pages (write), zone (read), ssl_certs (write)
+- ai (write), ai-search (write), ai-search (run), websearch.run, agent-memory (write)
+- queues (write), pipelines (write), secrets_store (write)
+```
+
+- 00-2 で考えた最小権限と比べると: 広い
+- 認証情報の保存場所: `~/Library/Preferences/.wrangler/config/default.toml`
