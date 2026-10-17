@@ -62,9 +62,16 @@
 - Editor は既存の Worker の更新とデプロイだけで、新しい Worker は作れない（作るにはアカウント全体の Admin が必要）。トークンを Admin にはせず、新しい Worker は OAuth で手作業で作る。トークンは Editor のまま、Worker ができたらその Worker だけに範囲を絞る（CI を最小権限にするため）。まだ存在しない Worker は範囲に指定できないので、絞るのは 01 で Worker を作ったあと
 - TTL と IP 制限は付けない。どこからでも、いつまでも使えるようにするため。GitHub Actions の実行環境は IP が決まっていないので、IP 制限は CI と相性が悪い。その代わり、漏れたときは Dashboard ですぐに失効させる
 
-### terraform 用トークン
+### terraform 用トークン（Account API Token）
 
-- 未作成
+- 名前: `cloudflare-exercise-terraform`
+- 種類: Account API Token（wrangler 用と同じ理由）
+- Permission policies（範囲: アカウント全体）:
+  - Account Settings Read
+- Zone Resources: なし
+- Client IP Address Filtering: なし（すべての IP を許可）
+- TTL: なし（No expiration）
+- 00-4 はアカウント情報を読むだけなので、読み取りの権限だけにした。KV の権限は 02 で付け足す
 
 ## 00-3 wrangler でログインする
 
