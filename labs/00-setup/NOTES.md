@@ -35,3 +35,14 @@
 ### 完了条件
 
 - Dashboard を見ずに、Account ID がどこに表示されているかを説明する: 検索の `Copy account ID` と、ドメインを開いたときの URL の最初の部分（セッション中のやり取りで確認済み）
+
+## 00-2 最小権限の API トークンを作る
+
+### wrangler 用トークンに Zone Resources が要らない理由
+
+- `*.workers.dev` のサブドメイン（`<Worker 名>.takkyuuplayer.workers.dev` の `takkyuuplayer`）はアカウントごとに 1 つ付く設定で、ゾーンには属さないため
+- 参考: [workers.dev](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
+
+### 状態
+
+- スキップ: トークンはまだ作っていない。トークンが必要になる演習（00-3 の API トークンでの認証、00-4）に入るときに作る
