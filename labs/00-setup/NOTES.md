@@ -43,9 +43,22 @@
 - `*.workers.dev` のサブドメイン（`<Worker 名>.takkyuuplayer.workers.dev` の `takkyuuplayer`）はアカウントごとに 1 つ付く設定で、ゾーンには属さないため
 - 参考: [workers.dev](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
 
-### 状態
+### wrangler 用トークン（Account API Token）
 
-- スキップ: トークンはまだ作っていない。トークンが必要になる演習（00-3 の API トークンでの認証、00-4）に入るときに作る
+- 名前: `cloudflare-exercise-wrangler`
+- 種類: Account API Token。作った人がアカウントのメンバーから外れても消えないので、CI に向いている
+- Permission policies（範囲: アカウント全体）:
+  - Workers Metadata Read-Only
+  - Workers Editor
+  - Workers Content Read-Only
+- Zone Resources: なし（`*.workers.dev` はアカウントの設定で、ゾーンに属さないため）
+- Client IP Address Filtering: なし（すべての IP を許可）
+- TTL: なし（No expiration）
+- 参考: [Workers roles and permissions](https://developers.cloudflare.com/workers/authorization/workers/)
+
+### terraform 用トークン
+
+- 未作成
 
 ## 00-3 wrangler でログインする
 
@@ -77,4 +90,12 @@ Account Name: takkyuuplayer
 
 ### API トークンでの認証（`CLOUDFLARE_API_TOKEN`）
 
-- 未実施: 00-2 のトークンを作るときに行う
+`wrangler whoami` の結果（Account ID は伏せた）:
+
+```
+👋 You are logged in with an Account API Token, associated with the account takkyuuplayer.
+ℹ️   The API Token is read from the CLOUDFLARE_API_TOKEN environment variable.
+🔓 To see token permissions visit https://dash.cloudflare.com/<Account ID>/api-tokens
+```
+
+- OAuth との違い: アカウントにひも付く。権限の一覧は `whoami` に出ず、Dashboard で確認する
