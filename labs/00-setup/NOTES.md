@@ -67,3 +67,14 @@ Account Name: takkyuuplayer
 
 - 00-2 で考えた最小権限と比べると: 広い
 - 認証情報の保存場所: `~/Library/Preferences/.wrangler/config/default.toml`
+- `workers_routes (write)` があると、本番ゾーン（`takkyuuplayer.com/*`）に Route を付けて Worker にリクエストを通せる。リダイレクトで他のサイトにユーザーを誘導したり、レスポンスを書き換えたりできる。scope が `zone (read)` だけでも安全とは言えない
+
+### OAuth と API トークンの使い分け
+
+- OAuth ログイン: 人が手で実行するとき（ローカルでの開発）
+- API トークン: CI/CD。最小権限にして使う
+- CI で `wrangler login` を使わない理由: ブラウザでの認可が必要で CI では実行できない。また、OAuth の権限は広く、個人のアカウントにひも付いている
+
+### API トークンでの認証（`CLOUDFLARE_API_TOKEN`）
+
+- 未実施: 00-2 のトークンを作るときに行う
