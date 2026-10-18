@@ -46,7 +46,7 @@ Hello World!
 - `wrangler.jsonc`
   - `name`: Cloudflare 側で Worker を見分ける名前。手元で変えて deploy すると、名前の変更ではなく新しい Worker が作られる。前の Worker は残る
   - `main`: エントリーポイント。TypeScript は Cloudflare 上でそのまま動くのではなく、`wrangler dev` / `wrangler deploy` が esbuild でビルドしてからアップロードする
-  - `compatibility_date`: ランタイムの挙動をこの日付の時点に固定する。固定しないと、Cloudflare 側の更新でデプロイ後に急に動かなくなるかもしれない
+  - `compatibility_date`: ランタイムの挙動をこの日付の時点に固定する。デプロイ済みの Worker はランタイムが更新されても挙動が変わらない。固定しないと、次に deploy したときに新しい挙動が取り込まれて動かなくなるかもしれない。だから wrangler は `compatibility_date` がないと deploy を拒否する（`wrangler dev` は警告を出して wrangler に組み込まれた日付を使う。wrangler 4.149.0 では `2026-10-06`）
   - `observability`: Workers Logs にログを記録し、Dashboard で見られるようにする（`wrangler tail` はリアルタイムで流す別の仕組み）
 - `src/index.ts`: `fetch(request, env, ctx)` ハンドラー
   - `request`: 受け取った `Request`
