@@ -1,29 +1,62 @@
-import {
-	env,
-	createExecutionContext,
-	waitOnExecutionContext,
-	SELF,
-} from "cloudflare:test";
+import { SELF } from "cloudflare:test";
 import { describe, it, expect } from "vitest";
-import worker from "../src/index";
 
-// For now, you'll need to do something like this to get a correctly-typed
-// `Request` to pass to `worker.fetch()`.
-const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
+describe("GET /", () => {
+	it("returns text", async () => {
+		const response = await SELF.fetch("https://example.com/");
+		expect(response.status).toBe(200);
+		expect(await response.text()).toBe("Hello from 01-workers-intro\n");
+	});
+});
 
-describe("Hello World worker", () => {
-	it("responds with Hello World! (unit style)", async () => {
-		const request = new IncomingRequest("http://example.com");
-		// Create an empty context to pass to `worker.fetch()`.
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
-		await waitOnExecutionContext(ctx);
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
+describe("GET /whoami", () => {
+	it("returns cf properties and selected headers as JSON", async () => {
+		const response = await SELF.fetch("https://example.com/whoami", {
+			headers: { "User-Agent": "vitest", Cookie: "secret=1" },
+		});
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Type")).toContain("application/json");
+
+		const body = await response.json<{ cf: object; headers: Record<string, string> }>();
+		expect(Object.keys(body.cf)).toEqual(
+			expect.arrayContaining(["colo", "country", "asn"]),
+		);
+		expect(body.cf).not.toHaveProperty("tlsExportedAuthenticator");
+		expect(body.headers["user-agent"]).toBe("vitest");
+		expect(body.headers).not.toHaveProperty("cookie");
+	});
+});
+
+describe("POST /echo", () => {
+	it("returns the JSON body as is", async () => {
+		const payload = { message: "hello", items: [1, 2, 3] };
+		const response = await SELF.fetch("https://example.com/echo", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload),
+		});
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual(payload);
 	});
 
-	it("responds with Hello World! (integration style)", async () => {
-		const response = await SELF.fetch("https://example.com");
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
+	it("returns 400 when the body is not JSON", async () => {
+		const response = await SELF.fetch("https://example.com/echo", {
+			method: "POST",
+			body: "not json",
+		});
+		expect(response.status).toBe(400);
+	});
+});
+
+describe("other requests", () => {
+	it("returns 404 for an unknown path", async () => {
+		const response = await SELF.fetch("https://example.com/unknown");
+		expect(response.status).toBe(404);
+	});
+
+	it("returns 405 with Allow for a known path and a wrong method", async () => {
+		const response = await SELF.fetch("https://example.com/echo");
+		expect(response.status).toBe(405);
+		expect(response.headers.get("Allow")).toBe("POST");
 	});
 });
