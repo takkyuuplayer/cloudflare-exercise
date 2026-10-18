@@ -152,3 +152,12 @@ GET https://01-workers-intro.takkyuuplayer.workers.dev/boom - Exception Thrown @
 - ログには `Exception Thrown` と、スタックトレースが出る。`upload_source_maps: true` でソースマップもアップロードしているので、ビルド後の JavaScript ではなく `src/index.ts` の行番号が出る
 - `/echo` に `try/catch` がなければ、JSON でないボディには 400 ではなく 500（1101）が返る。クライアントの誤りなのにサーバーの不具合に見え、ログにも `Exception Thrown` が残って本当の障害と見分けにくくなる
 - `/boom` は練習用なので、本番に残したままにした
+
+## 01-5 バージョンとロールバック
+
+今回は手を動かさず、[Versions & Deployments](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/) を読んで説明した。
+
+- version: Worker のコードや設定を変えたときにできる、変更できないスナップショット。`wrangler deploy` のほか、`wrangler versions upload` でも作られる（こちらはトラフィックを流さない）
+- deployment: どの version にトラフィックを流しているかを表す。1 つの deployment が複数の version を割合（%）で指すこともできる
+- rollback: 新しい version は作らず、古い version を指す新しい deployment を作る。だから `deployments list` の履歴は減らずに増える
+- rollback しても手元の `src/index.ts` は新しいまま。次に `wrangler deploy` すると新しい version ができて、rollback は事実上なかったことになる
