@@ -109,3 +109,46 @@ content-type: application/json
 - 404 ではなく 405 にしたのは、`Allow` ヘッダーで「この path は POST なら使える」と伝えられるから（RFC 9110 §15.5.6）
 - `?? null` は、`JSON.stringify` が `undefined` のキーを消すため。テストでは `cf` がなく、最初の版は `{"cf":{}}` になった
 - `request.json()` は JSON でないと例外を投げる。`try/catch` がないと 400 ではなくなる（何が返るかは 01-4 で試す）
+
+## 01-4 ログを追う
+
+- `wrangler tail` は `cloudflare-exercise-wrangler` トークン（`Workers Tail Read` を追加、対象はこの Worker だけ）で動いた。トークンは `mise.local.toml` の `[env]` から読む
+- `console.log` を足した deploy も、`wrangler login` なしでトークンだけで通った
+
+### 正常時
+
+```console
+$ npx wrangler tail
+Connected to 01-workers-intro, waiting for logs...
+GET https://01-workers-intro.takkyuuplayer.workers.dev/nope - Ok @ 10/18/2026, 2:08:51 PM
+  (log) GET https://01-workers-intro.takkyuuplayer.workers.dev/nope
+```
+
+- `/nope` は 404 を返したのに `Ok` と出る。`Ok` は HTTP ステータスではなく outcome（Worker が例外や上限超過なしに Response を返したか）
+
+### 例外時（`GET /boom`）
+
+```console
+$ curl -i https://01-workers-intro.takkyuuplayer.workers.dev/boom
+HTTP/2 500
+content-type: text/plain; charset=UTF-8
+cache-control: private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+
+error code: 1101
+```
+
+```console
+GET https://01-workers-intro.takkyuuplayer.workers.dev/boom - Exception Thrown @ 10/18/2026, 2:12:10 PM
+  (log) GET https://01-workers-intro.takkyuuplayer.workers.dev/boom
+✘ [ERROR] Error: Boom!
+
+      at GET (src/index.ts:15:32)
+      at Object.fetch (src/index.ts:38:10)
+```
+
+### 気付いたこと
+
+- 例外が起きると、クライアントには Cloudflare が作った `500` と `error code: 1101`（Worker threw exception）だけが返る。エラーメッセージやスタックトレースは返らない
+- ログには `Exception Thrown` と、スタックトレースが出る。`upload_source_maps: true` でソースマップもアップロードしているので、ビルド後の JavaScript ではなく `src/index.ts` の行番号が出る
+- `/echo` に `try/catch` がなければ、JSON でないボディには 400 ではなく 500（1101）が返る。クライアントの誤りなのにサーバーの不具合に見え、ログにも `Exception Thrown` が残って本当の障害と見分けにくくなる
+- `/boom` は練習用なので、本番に残したままにした
