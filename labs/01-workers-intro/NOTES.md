@@ -105,6 +105,7 @@ content-type: application/json
   - `httpProtocol`: ローカルは `HTTP/1.1`、本番は `HTTP/2`
   - `cf-connecting-ip`: ローカルは `::1`（IPv6 の localhost）。curl がエッジを通らず手元の workerd に直接つながるため。本番はエッジが付けた実際のグローバル IP
   - `cf-ipcountry`、`cf-ray`、`x-forwarded-proto` は本番だけに付く
+  - ローカルの `cf` は、そのリクエストのものではない。wrangler（miniflare）が `https://workers.cloudflare.com/cf.json` から取ってきて `node_modules/.mf/cf.json` に保存したもので、更新日時はプロジェクトを作った 2026-10-17 20:20。30 日経つまで同じ値を使い回す。VPN などで接続元を変えても、ローカルの `country` や `colo` は変わらない
 - 404 ではなく 405 にしたのは、`Allow` ヘッダーで「この path は POST なら使える」と伝えられるから（RFC 9110 §15.5.6）
 - `?? null` は、`JSON.stringify` が `undefined` のキーを消すため。テストでは `cf` がなく、最初の版は `{"cf":{}}` になった
 - `request.json()` は JSON でないと例外を投げる。`try/catch` がないと 400 ではなくなる（何が返るかは 01-4 で試す）
