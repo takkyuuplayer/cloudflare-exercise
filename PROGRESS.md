@@ -7,7 +7,7 @@
 | # | モジュール | 状態 | 完了日 | メモ |
 | --- | --- | --- | --- | --- |
 | 00 | 環境準備とアカウントの基礎 | 完了 | 2026-10-17 | トークンはどちらも Account API Token |
-| 01 | Workers 入門 | 未着手 | | |
+| 01 | Workers 入門 | 進行中 | | 01-1〜01-3 完了。次は 01-4・01-5 |
 | 02 | IaC 入門 | 未着手 | | |
 | 03 | ゾーンと DNS | 未着手 | | |
 | 04 | SSL/TLS | 未着手 | | |
@@ -35,16 +35,25 @@
 | リソース | 作ったモジュール | 管理方法 | 残す理由 |
 | --- | --- | --- | --- |
 | Account API Token `cloudflare-exercise-wrangler`（Workers Editor、期限なし） | 00 | Dashboard | 01 以降で wrangler から使う。01 で Worker を作ったら、その Worker だけに範囲を絞る |
+| Worker `hello-world`（`hello-world.takkyuuplayer.workers.dev`） | 01 | Dashboard | 01-1 で作成。01 の後片付けで削除する |
+| Worker `01-workers-intro`（`01-workers-intro.takkyuuplayer.workers.dev`） | 01 | `labs/01-workers-intro/`（wrangler） | 01-4・01-5 で使い続ける |
 | Account API Token `cloudflare-exercise-terraform`（Account Settings Read、期限なし） | 00 | Dashboard | 02 以降で Terraform から使う。02 で KV の権限を足す |
 
 ## 残っている疑問
 
 - `takkyuuplayer.com` は本番のサイトで使っているゾーン。Part 2（03〜07）をどのドメインで進めるか、03 に入る前に決める（練習用のドメインを別に買う / サブドメインだけ使う など）
+- Account API Token で、特定の Worker だけに権限を絞れるか（01-4 の前に確かめる）
 - トークンを Terraform で管理しようとすると、どんな問題が起きるか（02 で考える）
 
 ## 学習ログ
 
 新しいものを上に追記する。
+
+### 2026-10-18 モジュール 01（01-1〜01-3）
+- やったこと: Dashboard で `hello-world` を作って書き換えた。C3 で `labs/01-workers-intro/` を作った。`/`・`/whoami`・`/echo`・404 を実装し、OAuth で 1 回だけ deploy して logout した
+- 学んだこと: Dashboard で作った Worker の正は Cloudflare にあり、Git にはない。`wrangler.jsonc` の `name` を変えると新しい Worker ができる。OAuth は route を書き込めるので、書き間違えると本番のゾーンへのリクエストがこの Worker に届きうる。ローカルの `cf` は、過去に一度取ってきた値のキャッシュ（30 日）で、そのリクエストのものではない
+- つまずいたこと: Dashboard のエディタの場所。`worker-configuration.d.ts` をコミットするかどうか（`tsconfig.json` が参照しているのでコミットした）。テストが Node.js ではなく workerd で動くこと
+- 次回: Draft PR を出す。トークンを特定の Worker だけに絞れるか確かめる。01-4（ログ）・01-5（ロールバック）
 
 ### 2026-10-17 モジュール 00
 - やったこと: Account ID とゾーンの関係を確認し、2 要素認証を設定した。wrangler 用と terraform 用の Account API Token を作った。wrangler に OAuth とトークンの両方でログインした。Terraform の data source でアカウント名を読んだ
