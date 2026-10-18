@@ -63,3 +63,48 @@ Hello World!
 
 - 最初の 1 回だけ `wrangler login`（OAuth）で deploy して Worker を作る。終わったらすぐ `wrangler logout` する。2 回目以降は `cloudflare-exercise-wrangler` トークンを使う
 - 理由: OAuth には `workers_routes (write)` が含まれる。`wrangler.jsonc` に `takkyuuplayer.com/*` の route を書き間違えて deploy すると、本番サイトへのリクエストがオリジンではなくこの Worker に届き、本番が上書きされうる。トークンには route の権限がないので、同じ間違いをしても権限エラーで止まる
+
+### 動作確認（デプロイ後）
+
+URL: `https://01-workers-intro.takkyuuplayer.workers.dev`（ヘッダーは必要な行だけ抜粋。IP アドレスと市区町村は伏せた）
+
+```console
+$ curl -i https://01-workers-intro.takkyuuplayer.workers.dev/
+HTTP/2 200
+content-type: text/plain;charset=UTF-8
+cf-ray: a4c40a1e3b05e364-NRT
+
+Hello from 01-workers-intro
+
+$ curl https://01-workers-intro.takkyuuplayer.workers.dev/whoami
+{"cf":{"colo":"NRT","country":"JP","city":"xxx","asn":2516,"asOrganization":"Japan Internet Xing Co., Ltd.","httpProtocol":"HTTP/2","tlsVersion":"TLSv1.3"},"headers":{"user-agent":"curl/8.7.1","accept":"*/*","cf-connecting-ip":"240b:10:xxxx:...","cf-ipcountry":"JP","cf-ray":"a4c40a5fdb8c2934","x-forwarded-proto":"https"}}
+
+$ curl -i -X POST -H 'Content-Type: application/json' -d '{"a":1}' https://01-workers-intro.takkyuuplayer.workers.dev/echo
+HTTP/2 200
+content-type: application/json
+
+{"a":1}
+
+$ curl -i -X POST -d 'notjson' https://01-workers-intro.takkyuuplayer.workers.dev/echo
+HTTP/2 400
+content-type: application/json
+
+{"error":"Body must be valid JSON"}
+
+$ curl -i https://01-workers-intro.takkyuuplayer.workers.dev/nope
+HTTP/2 404
+content-type: application/json
+
+{"error":"Not Found"}
+```
+
+### 気付いたこと
+
+- `colo` は `NRT`（成田）。`cf-ray` の末尾も同じ `NRT`
+- ローカル（`wrangler dev`）と本番の違い
+  - `httpProtocol`: ローカルは `HTTP/1.1`、本番は `HTTP/2`
+  - `cf-connecting-ip`: ローカルは `::1`（IPv6 の localhost）。curl がエッジを通らず手元の workerd に直接つながるため。本番はエッジが付けた実際のグローバル IP
+  - `cf-ipcountry`、`cf-ray`、`x-forwarded-proto` は本番だけに付く
+- 404 ではなく 405 にしたのは、`Allow` ヘッダーで「この path は POST なら使える」と伝えられるから（RFC 9110 §15.5.6）
+- `?? null` は、`JSON.stringify` が `undefined` のキーを消すため。テストでは `cf` がなく、最初の版は `{"cf":{}}` になった
+- `request.json()` は JSON でないと例外を投げる。`try/catch` がないと 400 ではなくなる（何が返るかは 01-4 で試す）
