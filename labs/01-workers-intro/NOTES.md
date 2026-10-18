@@ -56,3 +56,10 @@ Hello World!
 - `test/` と `vitest.config.mts`: `@cloudflare/vitest-plugin` を使ったテスト。Node.js ではなく Workers のランタイム（workerd）の中で実行される。`wrangler.jsonc` を読むのは、本番と同じ設定・binding でテストするため
 - `worker-configuration.d.ts`: `wrangler types` が `wrangler.jsonc` から生成する型定義（`Env` など）。生成できるがコミットする。`tsconfig.json` が名前で参照しており、ファイルを作り直す script もないので、clone した直後の人や CI でも型チェックが通るようにするため。binding を変えたら `npm run cf-typegen` で作り直してコミットする
 - `AGENTS.md`: C3 が追加した AI ツール向けの説明。中身を読んだうえで残した
+
+## 01-3 リクエストを観察する API を作る
+
+### デプロイの認証方針
+
+- 最初の 1 回だけ `wrangler login`（OAuth）で deploy して Worker を作る。終わったらすぐ `wrangler logout` する。2 回目以降は `cloudflare-exercise-wrangler` トークンを使う
+- 理由: OAuth には `workers_routes (write)` が含まれる。`wrangler.jsonc` に `takkyuuplayer.com/*` の route を書き間違えて deploy すると、本番サイトへのリクエストがオリジンではなくこの Worker に届き、本番が上書きされうる。トークンには route の権限がないので、同じ間違いをしても権限エラーで止まる
