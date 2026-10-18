@@ -7,7 +7,7 @@
 | # | モジュール | 状態 | 完了日 | メモ |
 | --- | --- | --- | --- | --- |
 | 00 | 環境準備とアカウントの基礎 | 完了 | 2026-10-17 | トークンはどちらも Account API Token |
-| 01 | Workers 入門 | 進行中 | | 01-1〜01-3 完了。次は 01-4・01-5 |
+| 01 | Workers 入門 | 完了 | 2026-10-18 | 01-5 はドキュメントを読んで説明した |
 | 02 | IaC 入門 | 未着手 | | |
 | 03 | ゾーンと DNS | 未着手 | | |
 | 04 | SSL/TLS | 未着手 | | |
@@ -34,20 +34,30 @@
 
 | リソース | 作ったモジュール | 管理方法 | 残す理由 |
 | --- | --- | --- | --- |
-| Account API Token `cloudflare-exercise-wrangler`（Workers Editor、期限なし） | 00 | Dashboard | 01 以降で wrangler から使う。01 で Worker を作ったら、その Worker だけに範囲を絞る |
-| Worker `hello-world`（`hello-world.takkyuuplayer.workers.dev`） | 01 | Dashboard | 01-1 で作成。01 の後片付けで削除する |
-| Worker `01-workers-intro`（`01-workers-intro.takkyuuplayer.workers.dev`） | 01 | `labs/01-workers-intro/`（wrangler） | 01-4・01-5 で使い続ける |
+| Account API Token `cloudflare-exercise-wrangler`（Workers Editor ＋ Workers Tail Read、対象は Worker `01-workers-intro` だけ、期限なし） | 00 | Dashboard。値は `mise.local.toml` | wrangler から deploy・tail する。新しい Worker は作れないので、作るときは OAuth で 1 回だけ deploy して logout する |
+| Worker `01-workers-intro`（`01-workers-intro.takkyuuplayer.workers.dev`） | 01 | `labs/01-workers-intro/`（wrangler） | 練習用。わざと例外を投げる `/boom` も残している |
 | Account API Token `cloudflare-exercise-terraform`（Account Settings Read、期限なし） | 00 | Dashboard | 02 以降で Terraform から使う。02 で KV の権限を足す |
 
 ## 残っている疑問
 
 - `takkyuuplayer.com` は本番のサイトで使っているゾーン。Part 2（03〜07）をどのドメインで進めるか、03 に入る前に決める（練習用のドメインを別に買う / サブドメインだけ使う など）
-- Account API Token で、特定の Worker だけに権限を絞れるか（01-4 の前に確かめる）
+- Dashboard で `Workers Tail Read` が legacy と表示された。代わりに何を使うべきか（公式の権限一覧には legacy の記述がない）
+- `mise.local.toml` はグローバルの gitignore でしか無視されていない。リポジトリの `.gitignore` に足すか
 - トークンを Terraform で管理しようとすると、どんな問題が起きるか（02 で考える）
 
 ## 学習ログ
 
 新しいものを上に追記する。
+
+### 2026-10-18 モジュール 01（01-4・01-5、口頭試問）
+- やったこと: トークンを `01-workers-intro` だけに絞り、`Workers Tail Read` を足した。`wrangler tail` で `console.log` と例外を観察した。`typecheck` script を足した。01-5 はドキュメントで確認した。口頭試問をした。`hello-world` を削除した
+- 学んだこと: tail の `Ok` は HTTP ステータスではなく outcome。例外ではクライアントに 500 と `error code: 1101` だけが返り、ログにはソースマップで `src/index.ts` の行番号つきのスタックトレースが出る。deploy もテストも esbuild で型を取り除くだけなので、型の誤りは `tsc` でしか気付けない。コミットした型定義が古いかは `wrangler types --check` で分かる。rollback は古い version を指す新しい deployment を作る
+- 口頭試問:
+  - isolate の利点と制約: 起動が速くコールドスタートがほぼない。evict されうるので、グローバル変数の state は消えるかもしれない
+  - `wrangler dev`: 手元で本番と同じ workerd を動かす。`request.cf` はローカルのキャッシュファイルの値で、HTTP は 1.1（本番は 2）
+  - source of truth: `hello-world` は Cloudflare、`01-workers-intro` は Git。Dashboard で編集しても、次の `wrangler deploy` で上書きされる
+- つまずいたこと: `compatibility_date` が効くのはデプロイ済みの Worker ではなく次の deploy。Dashboard の `Workers Tail Read` の legacy 表示
+- 次回: PR #4 をマージする。02 IaC 入門
 
 ### 2026-10-18 モジュール 01（01-1〜01-3）
 - やったこと: Dashboard で `hello-world` を作って書き換えた。C3 で `labs/01-workers-intro/` を作った。`/`・`/whoami`・`/echo`・404 を実装し、OAuth で 1 回だけ deploy して logout した
