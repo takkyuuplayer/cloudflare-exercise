@@ -12,10 +12,13 @@ const ROUTES: Record<string, Record<string, (request: Request) => Response | Pro
 	"/": { GET: handleRoot },
 	"/whoami": { GET: handleWhoami },
 	"/echo": { POST: handleEcho },
+	"/boom": { GET: () => { throw new Error("Boom!"); } }
 };
 
 export default {
 	async fetch(request): Promise<Response> {
+		console.log(request.method, request.url);
+
 		const { pathname } = new URL(request.url);
 		const handlers = ROUTES[pathname];
 		if (!handlers) {
