@@ -48,6 +48,36 @@ describe("POST /echo", () => {
 	});
 });
 
+describe("/kv/:key", () => {
+	it("returns the value stored by PUT", async () => {
+		const put = await SELF.fetch("https://example.com/kv/greeting", {
+			method: "PUT",
+			body: "hello",
+		});
+		expect(put.status).toBe(204);
+
+		const get = await SELF.fetch("https://example.com/kv/greeting");
+		expect(get.status).toBe(200);
+		expect(await get.text()).toBe("hello");
+	});
+
+	it("returns 404 for a key that does not exist", async () => {
+		const response = await SELF.fetch("https://example.com/kv/missing");
+		expect(response.status).toBe(404);
+	});
+
+	it("returns 404 when the key is empty", async () => {
+		const response = await SELF.fetch("https://example.com/kv/");
+		expect(response.status).toBe(404);
+	});
+
+	it("returns 405 with Allow for a wrong method", async () => {
+		const response = await SELF.fetch("https://example.com/kv/greeting", { method: "DELETE" });
+		expect(response.status).toBe(405);
+		expect(response.headers.get("Allow")).toBe("GET, PUT");
+	});
+});
+
 describe("other requests", () => {
 	it("returns 404 for an unknown path", async () => {
 		const response = await SELF.fetch("https://example.com/unknown");
