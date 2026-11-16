@@ -8,19 +8,26 @@ const WHOAMI_HEADERS = [
 	"x-forwarded-proto",
 ];
 
-const ROUTES: Record<string, Record<string, (request: Request) => Response | Promise<Response>>> = {
+type Handler = (request: Request, env: Env) => Response | Promise<Response>;
+
+const ROUTES: Record<string, Record<string, Handler>> = {
 	"/": { GET: handleRoot },
 	"/whoami": { GET: handleWhoami },
 	"/echo": { POST: handleEcho },
 	"/boom": { GET: () => { throw new Error("Boom!"); } }
 };
 
+const KV_PREFIX = "/kv/";
+const KV_HANDLERS: Record<string, Handler> = { GET: handleKvGet, PUT: handleKvPut };
+
 export default {
-	async fetch(request): Promise<Response> {
+	async fetch(request, env): Promise<Response> {
 		console.log(request.method, request.url);
 
 		const { pathname } = new URL(request.url);
-		const handlers = ROUTES[pathname];
+		const handlers = pathname.length > KV_PREFIX.length && pathname.startsWith(KV_PREFIX)
+			? KV_HANDLERS
+			: ROUTES[pathname];
 		if (!handlers) {
 			return Response.json({ error: "Not Found" }, { status: 404 });
 		}
@@ -35,7 +42,7 @@ export default {
 			);
 		}
 
-		return handler(request);
+		return handler(request, env);
 	},
 } satisfies ExportedHandler<Env>;
 
@@ -78,4 +85,21 @@ async function handleEcho(request: Request): Promise<Response> {
 		return Response.json({ error: "Body must be valid JSON" }, { status: 400 });
 	}
 	return Response.json(body);
+}
+
+function kvKey(request: Request): string {
+	return decodeURIComponent(new URL(request.url).pathname.slice(KV_PREFIX.length));
+}
+
+async function handleKvGet(request: Request, env: Env): Promise<Response> {
+	const value = await env.KV.get(kvKey(request));
+	if (value === null) {
+		return Response.json({ error: "Not Found" }, { status: 404 });
+	}
+	return new Response(value);
+}
+
+async function handleKvPut(request: Request, env: Env): Promise<Response> {
+	await env.KV.put(kvKey(request), await request.text());
+	return new Response(null, { status: 204 });
 }

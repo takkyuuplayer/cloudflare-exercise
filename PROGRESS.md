@@ -8,7 +8,7 @@
 | --- | --- | --- | --- | --- |
 | 00 | 環境準備とアカウントの基礎 | 完了 | 2026-10-17 | トークンはどちらも Account API Token |
 | 01 | Workers 入門 | 完了 | 2026-10-18 | 01-5 はドキュメントを読んで説明した |
-| 02 | IaC 入門 | 未着手 | | |
+| 02 | IaC 入門 | 進行中 | | 02-1・02-2 完了 |
 | 03 | ゾーンと DNS | 未着手 | | |
 | 04 | SSL/TLS | 未着手 | | |
 | 05 | キャッシュと CDN | 未着手 | | |
@@ -36,18 +36,26 @@
 | --- | --- | --- | --- |
 | Account API Token `cloudflare-exercise-wrangler`（Workers Editor ＋ Workers Tail Read、対象は Worker `01-workers-intro` だけ、期限なし） | 00 | Dashboard。値は `mise.local.toml` | wrangler から deploy・tail する。新しい Worker は作れないので、作るときは OAuth で 1 回だけ deploy して logout する |
 | Worker `01-workers-intro`（`01-workers-intro.takkyuuplayer.workers.dev`） | 01 | `labs/01-workers-intro/`（wrangler） | 練習用。わざと例外を投げる `/boom` も残している |
-| Account API Token `cloudflare-exercise-terraform`（Account Settings Read、期限なし） | 00 | Dashboard | 02 以降で Terraform から使う。02 で KV の権限を足す |
+| Account API Token `cloudflare-exercise-terraform`（Account Settings Read ＋ Workers KV Storage、期限なし） | 00 | Dashboard。値は `mise.local.toml` の `TF_VAR_cloudflare_api_token` | 02 以降で Terraform から使う。KV の権限はアカウント単位でしか付けられない |
+| KV namespace `02-iac-basics` | 02 | `labs/02-iac-basics/terraform/` | 02 の演習用。`01-workers-intro` に `KV` としてバインドしている。02 の後片付けで、バインディングを外してから `terraform destroy` する |
 
 ## 残っている疑問
 
 - `takkyuuplayer.com` は本番のサイトで使っているゾーン。Part 2（03〜07）をどのドメインで進めるか、03 に入る前に決める（練習用のドメインを別に買う / サブドメインだけ使う など）
 - Dashboard で `Workers Tail Read` が legacy と表示された。代わりに何を使うべきか（公式の権限一覧には legacy の記述がない）
-- `mise.local.toml` はグローバルの gitignore でしか無視されていない。リポジトリの `.gitignore` に足すか
-- トークンを Terraform で管理しようとすると、どんな問題が起きるか（02 で考える）
+- トークンを Terraform で管理しようとすると、どんな問題が起きるか（02-5 で考える）
+- `workers.dev` を Access で自分だけが見られるようにする方法（16 で扱う）
+- KV Instant namespace（provider の `mode = "instant"`）は、整合性がどう違うのか
 
 ## 学習ログ
 
 新しいものを上に追記する。
+
+### 2026-10-19 モジュール 02（02-1・02-2）
+- やったこと: Terraform で KV namespace を作り、ID を output に出した。provider のトークンを `TF_VAR_cloudflare_api_token` に分けた。01 の Worker に KV バインディングと `GET`・`PUT /kv/:key` を足して deploy した
+- 学んだこと: KV の権限はアカウント単位でしか絞れない。KV バインディング付きの Worker の deploy に KV の権限は要らない（アクセスするのは実行時の Worker）。そのため Worker を deploy できるトークンは、ID さえ分かればアカウント内のどの KV にも届く。守るにはアカウントを分ける。Vitest のストレージはテストファイルごとに分かれる。KV は結果整合性
+- つまずいたこと: トークンの値の取り違えが 2 回（`terraform apply` の 401、`wrangler deploy` の失敗）。新しいリソースを作るだけの `terraform plan` は書き込み権限の証拠にならない。原因を KV バインディングだと決めつけかけたが、KV を足す前のコードと比べて切り分けた
+- 次回: push して Draft PR を出す。02-3（ドリフト）から再開
 
 ### 2026-10-18 モジュール 01（01-4・01-5、口頭試問）
 - やったこと: トークンを `01-workers-intro` だけに絞り、`Workers Tail Read` を足した。`wrangler tail` で `console.log` と例外を観察した。`typecheck` script を足した。01-5 はドキュメントで確認した。口頭試問をした。`hello-world` を削除した
